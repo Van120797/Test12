@@ -200,21 +200,6 @@
   }
   .btn-secondary:hover { border-color: var(--muted); background: var(--surface2); }
 
-  .hero-stats {
-    margin-top: 80px;
-    display: flex;
-    gap: 48px;
-    animation: fadeUp 0.6s 0.4s ease both;
-  }
-  .stat-item { display: flex; flex-direction: column; gap: 4px; }
-  .stat-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .stat-label { font-size: 0.85rem; color: var(--muted); }
-
   /* ── DIVIDER ── */
   .section-divider {
     height: 1px;
@@ -832,6 +817,34 @@
   }
   .modal-submit:hover { opacity: 0.9; transform: translateY(-1px); }
 
+  /* ── HERO PILLS ── */
+  .hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 48px;
+  }
+
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .hero-pill:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
     nav { padding: 16px 24px; }
@@ -1189,19 +1202,12 @@
       <span>📲</span> Download Now
     </a>
   </div>
-  <div class="hero-stats">
-    <div class="stat-item">
-      <span class="stat-num">12K+</span>
-      <span class="stat-label">Active Users</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">340+</span>
-      <span class="stat-label">Skill Categories</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">98%</span>
-      <span class="stat-label">User Satisfaction</span>
-    </div>
+  <div class="hero-pills">
+    <span class="hero-pill">📍 Location-Based Matching</span>
+    <span class="hero-pill">🪙 Token Economy</span>
+    <span class="hero-pill">✅ Verified Badges</span>
+    <span class="hero-pill">💬 In-App Chat</span>
+    <span class="hero-pill">🔒 Free Forever</span>
   </div>
 </section>
 
