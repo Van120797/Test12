@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillSwap — Exchange Skills, No Cash Needed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f0e;
+    --surface: #141716;
+    --surface2: #1c1f1d;
+    --border: #252926;
+    --accent: #b5f13c;
+    --accent2: #3cf19e;
+    --accent3: #f1c23c;
+    --text: #e8ede9;
+    --muted: #7a8c7d;
+    --danger: #f13c5f;
+  }
+
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(13,15,14,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-dot { color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent);
+    color: #0d0f0e;
+    padding: 9px 20px;
+    border-radius: 100px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); opacity: 0.9; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+  }
+  .hero-bg-circle.c1 {
+    width: 600px; height: 600px;
+    background: rgba(181,241,60,0.07);
+    top: -100px; right: -100px;
+    animation: float1 8s ease-in-out infinite;
+  }
+  .hero-bg-circle.c2 {
+    width: 400px; height: 400px;
+    background: rgba(60,241,158,0.05);
+    bottom: 0px; left: 200px;
+    animation: float2 10s ease-in-out infinite;
+  }
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,30px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-20px)} }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 32px;
+    width: fit-content;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge span { color: var(--accent); font-weight: 500; }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 1.0;
+    letter-spacing: -0.04em;
+    max-width: 900px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+  .hero-sub {
+    margin-top: 28px;
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.7;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-actions {
+    margin-top: 48px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #0d0f0e;
+    padding: 16px 28px;
+    border-radius: 100px;
+    font-weight: 500;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 40px rgba(181,241,60,0.2);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 60px rgba(181,241,60,0.35);
+  }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: var(--text);
+    padding: 16px 28px;
+    border-radius: 100px;
+    font-weight: 400;
+    font-size: 1rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--muted); background: var(--surface2); }
+
+  .hero-stats {
+    margin-top: 80px;
+    display: flex;
+    gap: 48px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .stat-item { display: flex; flex-direction: column; gap: 4px; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-label { font-size: 0.85rem; color: var(--muted); }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 48px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    padding: 100px 48px;
+  }
+  .section-tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.03em;
+    max-width: 600px;
+    line-height: 1.15;
+  }
+
+  .steps-grid {
+    margin-top: 64px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .step-card {
+    background: var(--surface);
+    padding: 40px 36px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .step-card:hover { background: var(--surface2); }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .step-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .step-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+  .step-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+
+  /* ── DEMO MATCHER ── */
+  .demo-section {
+    padding: 100px 48px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .demo-layout {
+    margin-top: 64px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .demo-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .demo-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .demo-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .demo-dot.red { background: #f13c5f; }
+  .demo-dot.yellow { background: var(--accent3); }
+  .demo-dot.green { background: var(--accent); }
+
+  .match-ui { padding: 28px; }
+  .match-input-group { margin-bottom: 20px; }
+  .match-label { font-size: 0.75rem; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .match-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  .match-input-icon { font-size: 1.1rem; }
+  .match-input-text { font-size: 0.9rem; color: var(--text); }
+  .match-input-tag {
+    margin-left: auto;
+    background: rgba(181,241,60,0.12);
+    color: var(--accent);
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+  }
+  .match-arrow {
+    text-align: center;
+    font-size: 1.4rem;
+    color: var(--muted);
+    margin: 12px 0;
+  }
+  .match-result {
+    margin-top: 24px;
+    background: rgba(181,241,60,0.06);
+    border: 1px solid rgba(181,241,60,0.2);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .match-result-label { font-size: 0.75rem; color: var(--accent); margin-bottom: 12px; }
+  .match-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .match-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+  }
+  .match-user-info { flex: 1; }
+  .match-user-name { font-weight: 500; font-size: 0.95rem; }
+  .match-user-skill { font-size: 0.8rem; color: var(--muted); }
+  .match-user-dist { font-size: 0.8rem; color: var(--accent3); font-weight: 500; }
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(60,241,158,0.1);
+    border: 1px solid rgba(60,241,158,0.2);
+    color: var(--accent2);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+  }
+
+  .demo-desc { display: flex; flex-direction: column; gap: 24px; }
+  .demo-desc h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+  .demo-desc p { color: var(--muted); line-height: 1.75; }
+  .location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    width: fit-content;
+  }
+  .location-badge span { color: var(--accent3); }
+
+  /* ── FEATURES ── */
+  .features { padding: 100px 48px; }
+  .features-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 64px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .feature-card {
+    background: var(--surface);
+    padding: 48px 44px;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card:hover { background: var(--surface2); }
+  .feature-card.accent-card { background: var(--accent); }
+  .feature-card.accent-card h3,
+  .feature-card.accent-card p { color: #0d0f0e; }
+  .feature-card.accent-card .feature-label { color: rgba(13,15,14,0.5); }
+  .feature-card.accent-card:hover { background: #c5ff4c; }
+
+  .feature-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .feature-icon-large { font-size: 2.5rem; margin-bottom: 20px; }
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.35rem;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .feature-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.75; }
+
+  /* Token animation */
+  .token-display {
+    margin-top: 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .token-coin {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent3), #e67e22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(241,194,60,0.3);
+    animation: coinBounce 2s ease-in-out infinite;
+  }
+  .token-coin:nth-child(2) { animation-delay: 0.15s; }
+  .token-coin:nth-child(3) { animation-delay: 0.3s; }
+  .token-coin:nth-child(4) { animation-delay: 0.45s; }
+  .token-coin:nth-child(5) { animation-delay: 0.6s; }
+  @keyframes coinBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+  /* ── DOWNLOAD ── */
+  .download {
+    padding: 100px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .download-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 80px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 64px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .download-inner::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(181,241,60,0.08) 0%, transparent 70%);
+    right: -100px; top: -100px;
+    border-radius: 50%;
+  }
+  .download-left { position: relative; z-index: 1; }
+  .download-left h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+  .download-left p { color: var(--muted); max-width: 500px; line-height: 1.75; margin-bottom: 40px; }
+  .download-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+
+  .android-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--accent);
+    color: #0d0f0e;
+    padding: 16px 28px;
+    border-radius: 16px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 60px rgba(181,241,60,0.25);
+  }
+  .android-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 80px rgba(181,241,60,0.4);
+  }
+  .android-btn-icon { font-size: 1.8rem; }
+  .android-btn-text { display: flex; flex-direction: column; }
+  .android-btn-small { font-size: 0.7rem; opacity: 0.7; }
+  .android-btn-big { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; line-height: 1; }
+
+  .notify-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: transparent;
+    color: var(--text);
+    padding: 16px 28px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .notify-btn:hover { border-color: var(--muted); background: var(--surface2); }
+  .notify-btn-icon { font-size: 1.5rem; }
+  .notify-btn-text { display: flex; flex-direction: column; text-align: left; }
+  .notify-btn-small { font-size: 0.7rem; color: var(--muted); }
+  .notify-btn-big { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
+
+  .download-right { position: relative; z-index: 1; }
+  .phone-mockup {
+    width: 220px;
+    background: #1a1d1b;
+    border-radius: 36px;
+    border: 2px solid #2a2d2b;
+    padding: 16px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+  }
+  .phone-notch {
+    width: 80px; height: 20px;
+    background: #0d0f0e;
+    border-radius: 0 0 16px 16px;
+    margin: 0 auto 12px;
+  }
+  .phone-screen { border-radius: 24px; overflow: hidden; background: var(--bg); }
+  .phone-app-header {
+    background: var(--surface);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .phone-app-logo {
+    width: 22px; height: 22px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #0d0f0e;
+    font-family: 'Syne', sans-serif;
+  }
+  .phone-app-name { font-size: 0.7rem; font-weight: 500; }
+  .phone-content { padding: 12px; }
+  .phone-match-card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .phone-match-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .phone-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    flex-shrink: 0;
+  }
+  .phone-name { font-size: 0.7rem; font-weight: 500; }
+  .phone-dist { font-size: 0.6rem; color: var(--muted); }
+  .phone-verified { font-size: 0.55rem; color: var(--accent2); }
+  .phone-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .phone-tag {
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    color: var(--muted);
+  }
+  .phone-tag.green { background: rgba(181,241,60,0.1); color: var(--accent); }
+  .phone-action {
+    background: var(--accent);
+    color: #0d0f0e;
+    border: none;
+    border-radius: 10px;
+    padding: 8px;
+    width: 100%;
+    font-size: 0.65rem;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+    margin-top: 8px;
+    cursor: pointer;
+  }
+  .phone-token-bar {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .phone-token-label { font-size: 0.6rem; color: var(--muted); }
+  .phone-token-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    color: var(--accent3);
+  }
+
+  /* ── REVIEWS ── */
+  .reviews { padding: 100px 48px; background: var(--surface); border-top: 1px solid var(--border); }
+  .reviews-scroll {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    margin-top: 48px;
+    padding-bottom: 16px;
+    scrollbar-width: none;
+  }
+  .reviews-scroll::-webkit-scrollbar { display: none; }
+  .review-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    min-width: 300px;
+    flex-shrink: 0;
+  }
+  .review-stars { color: var(--accent3); font-size: 0.85rem; margin-bottom: 16px; }
+  .review-text { font-size: 0.9rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+  .review-user { display: flex; align-items: center; gap: 12px; }
+  .review-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+  }
+  .review-name { font-size: 0.9rem; font-weight: 500; }
+  .review-skill { font-size: 0.75rem; color: var(--muted); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 60px 48px 40px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+  }
+  .footer-brand h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+  .footer-brand p { font-size: 0.85rem; color: var(--muted); line-height: 1.7; max-width: 300px; }
+  .footer-col h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .footer-col a {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--text); }
+  .footer-bottom {
+    padding: 24px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 420px;
+    width: 90%;
+    animation: fadeUp 0.3s ease;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
+  .modal-close:hover { background: var(--border); }
+  .modal h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  .modal p { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+  .modal-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-submit {
+    width: 100%;
+    background: var(--accent);
+    color: #0d0f0e;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .modal-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 120px 24px 60px; }
+    .hero-stats { gap: 28px; }
+    .section-divider { margin: 0 24px; }
+    .how, .features, .download, .reviews { padding: 60px 24px; }
+    .demo-section { padding: 60px 24px; }
+    .demo-layout { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .download-inner { grid-template-columns: 1fr; padding: 40px 28px; }
+    .download-right { display: none; }
+    footer { grid-template-columns: 1fr 1fr; gap: 32px; padding: 40px 24px; }
+    .footer-bottom { padding: 20px 24px; flex-direction: column; gap: 8px; }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 480px) {
+    /* Prevent horizontal overflow globally */
+    html, body { overflow-x: hidden; max-width: 100%; }
+    *, *::before, *::after { max-width: 100%; }
+
+    /* Nav */
+    nav { padding: 14px 20px; }
+
+    /* Hero — fix text clipping */
+    .hero {
+      padding: 100px 20px 56px;
+      overflow: hidden;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 11vw, 3.2rem);
+      letter-spacing: -0.03em;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
+    .hero-sub { font-size: 1rem; max-width: 100%; }
+    .hero-actions { flex-direction: column; gap: 12px; }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+    .hero-stats { flex-wrap: wrap; gap: 20px; margin-top: 48px; }
+    .stat-num { font-size: 1.6rem; }
+
+    /* Sections */
+    .how, .features, .download, .reviews { padding: 56px 20px; }
+    .demo-section { padding: 56px 20px; }
+    .section-divider { margin: 0 20px; }
+    .section-title { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+
+    /* Steps */
+    .steps-grid { margin-top: 40px; }
+    .step-card { padding: 28px 24px; }
+    .step-num { font-size: 2.5rem; }
+
+    /* Features */
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-card { padding: 32px 28px; }
+
+    /* Download */
+    .download-inner { padding: 36px 24px; gap: 32px; }
+    .download-left h2 { font-size: clamp(1.8rem, 8vw, 2.5rem); }
+    .download-btns { flex-direction: column; gap: 12px; }
+    .android-btn, .notify-btn { width: 100%; justify-content: center; }
+
+    /* Reviews */
+    .reviews-scroll { padding-bottom: 20px; }
+
+    /* Footer */
+    footer { grid-template-columns: 1fr; gap: 28px; padding: 40px 20px; }
+    .footer-bottom { padding: 20px; flex-direction: column; gap: 8px; text-align: center; }
+
+    /* Demo card */
+    .demo-layout { gap: 32px; }
+    .match-ui { padding: 20px; }
+
+    /* Twitter */
+    .twitter-section { padding: 56px 20px; }
+    .twitter-inner { gap: 40px; }
+  }
+
+  /* ── TWITTER SECTION ── */
+  .twitter-section {
+    padding: 100px 48px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+  .twitter-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .twitter-x-logo {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+    font-family: 'Syne', sans-serif;
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    width: 72px; height: 72px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .twitter-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .twitter-title em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .twitter-sub {
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 460px;
+    margin-bottom: 36px;
+  }
+  .twitter-sub strong { color: var(--text); }
+  .twitter-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .twitter-follow-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--text);
+    color: var(--bg);
+    padding: 14px 24px;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    box-shadow: 0 0 40px rgba(232,237,233,0.1);
+  }
+  .twitter-follow-btn:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 0 60px rgba(232,237,233,0.2);
+  }
+  .twitter-btn-icon { font-size: 1.4rem; font-weight: 900; }
+  .twitter-btn-text { display: flex; flex-direction: column; }
+  .twitter-btn-small { font-size: 0.65rem; opacity: 0.6; letter-spacing: 0.08em; }
+  .twitter-btn-big { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
+  .twitter-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text);
+    padding: 14px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .twitter-share-btn:hover { border-color: var(--muted); background: var(--surface2); }
+  .twitter-stats-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .tw-stat { display: flex; flex-direction: column; gap: 2px; }
+  .tw-stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--accent);
+  }
+  .tw-stat-lbl { font-size: 0.75rem; color: var(--muted); }
+  .tw-stat-divider { width: 1px; height: 36px; background: var(--border); }
+
+  /* Tweet feed */
+  .tweet-feed { display: flex; flex-direction: column; gap: 12px; }
+  .tweet-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px 22px;
+    transition: border-color 0.25s, transform 0.25s;
+    cursor: default;
+  }
+  .tweet-card:hover {
+    border-color: #3a3d3b;
+    transform: translateY(-2px);
+  }
+  .tweet-card--pinned { border-color: rgba(181,241,60,0.2); background: rgba(181,241,60,0.03); }
+  .tweet-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .tweet-avatar {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    color: #0d0f0e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  .tweet-user-info { display: flex; flex-direction: column; flex: 1; }
+  .tweet-name { font-weight: 600; font-size: 0.875rem; }
+  .tweet-handle { font-size: 0.75rem; color: var(--muted); }
+  .tweet-x-icon { font-size: 1.1rem; color: var(--muted); margin-left: auto; }
+  .tweet-time { font-size: 0.75rem; color: var(--muted); margin-left: auto; }
+  .tweet-text {
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .tweet-text strong { color: var(--accent); }
+  .tweet-media {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: center;
+  }
+  .tweet-media-inner { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .tweet-actions { display: flex; gap: 20px; align-items: center; }
+  .tweet-action {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+  }
+  .tweet-action:hover { color: var(--accent); }
+  .pinned-tag { margin-left: auto; font-size: 0.7rem; color: var(--muted); }
+  .tweet-view-more {
+    text-align: center;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .tweet-view-more:hover { background: var(--surface2); border-color: rgba(181,241,60,0.3); }
+
+  @media (max-width: 900px) {
+    .twitter-section { padding: 60px 24px; }
+    .twitter-inner { grid-template-columns: 1fr; }
+    .twitter-right { display: none; }
+  }
+
+
+  .apk-info-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .apk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .download-toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface);
+    border: 1px solid rgba(181,241,60,0.3);
+    border-radius: 16px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 999;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    min-width: 300px;
+  }
+  .download-toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-icon { font-size: 1.6rem; }
+  .toast-text { display: flex; flex-direction: column; gap: 2px; }
+  .toast-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .toast-sub { font-size: 0.78rem; color: var(--muted); }
+  .toast-progress {
+    height: 3px;
+    background: var(--border);
+    border-radius: 100px;
+    margin-top: 10px;
+    overflow: hidden;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    border-radius: 0 0 16px 16px;
+  }
+  .toast-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 100px;
+    width: 0%;
+    transition: width 3s ease;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Skill<span class="logo-dot">●</span>Swap</div>
+  <div class="nav-links">
+    <a href="#how-it-works">How It Works</a>
+    <a href="#features">Features</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#community">Community</a>
+    <a class="nav-cta" href="#download">Download App</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-circle c1"></div>
+  <div class="hero-bg-circle c2"></div>
+  <div class="hero-badge">🌱 <span>Sharing Economy</span> — Zero Cash</div>
+  <h1>Exchange Skills,<br><em>Grow Together</em></h1>
+  <p class="hero-sub">The first peer-to-peer skill-sharing platform. Teach what you know, learn what you want — directly from people near you.</p>
+  <div class="hero-actions">
+    <a href="#download" class="btn-primary">
+      <span>📲</span> Download Now
+    </a>
+    <a href="#cara-kerja" class="btn-secondary">
+      <span>▶</span> See How It Works
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num">12K+</span>
+      <span class="stat-label">Active Users</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">340+</span>
+      <span class="stat-label">Skill Categories</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">98%</span>
+      <span class="stat-label">User Satisfaction</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how-it-works">
+  <div class="reveal">
+    <p class="section-tag">How It Works</p>
+    <h2 class="section-title">As Simple as Four Steps</h2>
+  </div>
+  <div class="steps-grid reveal">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <span class="step-icon">📝</span>
+      <h3>Register Your Skills</h3>
+      <p>List what you can teach and what you want to learn. From basic Japanese to brewing espresso — every skill has value.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <span class="step-icon">📍</span>
+      <h3>Find Your Nearest Match</h3>
+      <p>Our location-based recommendation system matches you with the nearest users who have exactly the skills you need.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <span class="step-icon">🤝</span>
+      <h3>Start Exchanging</h3>
+      <p>Schedule a swap session and start learning directly from each other. No money, no barriers — just real human exchange.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <span class="step-icon">🪙</span>
+      <h3>Earn Tokens</h3>
+      <p>No direct match? Teach anyone to earn Tokens, then use those Tokens to learn from anyone else on the platform.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DEMO MATCHER -->
+<section class="demo-section">
+  <div class="reveal" style="text-align:center;margin-bottom:0">
+    <p class="section-tag" style="text-align:center">Live Demo</p>
+    <h2 class="section-title" style="max-width:100%;text-align:center">See How the Matching Works</h2>
+  </div>
+  <div class="demo-layout">
+    <div class="demo-card reveal">
+      <div class="demo-card-header">
+        <div class="demo-dot red"></div>
+        <div class="demo-dot yellow"></div>
+        <div class="demo-dot green"></div>
+        <span style="margin-left:8px">SkillSwap Matcher</span>
+      </div>
+      <div class="match-ui">
+        <div class="match-input-group">
+          <div class="match-label">🎯 Your Skill</div>
+          <div class="match-input-row">
+            <span class="match-input-icon">🇯🇵</span>
+            <span class="match-input-text">Basic Japanese (N5)</span>
+            <span class="match-input-tag">Verified</span>
+          </div>
+        </div>
+        <div class="match-arrow">⇅</div>
+        <div class="match-input-group">
+          <div class="match-label">📚 Want to Learn</div>
+          <div class="match-input-row">
+            <span class="match-input-icon">☕</span>
+            <span class="match-input-text">How to Make Espresso & Latte Art</span>
+          </div>
+        </div>
+        <div class="match-result">
+          <div class="match-result-label">✨ 3 Matches Found Near You</div>
+          <div class="match-user" style="margin-bottom:12px">
+            <div class="match-avatar" style="background:rgba(181,241,60,0.15);color:var(--accent)">RA</div>
+            <div class="match-user-info">
+              <div class="match-user-name">Ryan Anderson <span class="verified-badge">✓ Verified</span></div>
+              <div class="match-user-skill">☕ Barista 3 yrs · 🇯🇵 Learning Japanese</div>
+            </div>
+            <div class="match-user-dist">1.2 km</div>
+          </div>
+          <div class="match-user" style="margin-bottom:12px">
+            <div class="match-avatar" style="background:rgba(60,241,158,0.15);color:var(--accent2)">DS</div>
+            <div class="match-user-info">
+              <div class="match-user-name">Diana Spencer <span class="verified-badge">✓ Verified</span></div>
+              <div class="match-user-skill">☕ Home Barista · 🇯🇵 Going to Japan</div>
+            </div>
+            <div class="match-user-dist">2.8 km</div>
+          </div>
+          <div class="match-user">
+            <div class="match-avatar" style="background:rgba(241,194,60,0.15);color:var(--accent3)">MF</div>
+            <div class="match-user-info">
+              <div class="match-user-name">Mike Foster</div>
+              <div class="match-user-skill">☕ Coffee shop owner · 🇯🇵 Anime fan</div>
+            </div>
+            <div class="match-user-dist">3.5 km</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-desc reveal">
+      <div>
+        <p class="section-tag">Location-Based</p>
+        <h2>Learn from Your Neighbors</h2>
+      </div>
+      <p>Our AI system analyzes your skills and needs, then matches you with the most relevant nearby users. No need to go far — your learning community is right around you.</p>
+      <div class="location-badge">
+        <span>📍</span> <span>Detecting location</span> · Radius <span style="color:var(--accent)">5 km</span>
+      </div>
+      <p style="margin-top:0">All exchanges are community-verified. The more positive reviews you earn, the higher your trust score — and the easier it is to land the best matches.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="features-header reveal">
+    <div>
+      <p class="section-tag">Key Features</p>
+      <h2 class="section-title">Designed for Community</h2>
+    </div>
+  </div>
+  <div class="features-grid reveal">
+    <div class="feature-card accent-card">
+      <div class="feature-label">Token Economy</div>
+      <div class="feature-icon-large">🪙</div>
+      <h3>Token Credit System</h3>
+      <p>No direct match? Teach anyone, earn Tokens. Use Tokens to learn from anyone, anytime. A fair circular economy.</p>
+      <div class="token-display">
+        <div class="token-coin">T</div>
+        <div class="token-coin">T</div>
+        <div class="token-coin">T</div>
+        <div class="token-coin">T</div>
+        <div class="token-coin">T</div>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-label">Safety & Trust</div>
+      <div class="feature-icon-large">✅</div>
+      <h3>Verified Badge</h3>
+      <p>Real community reviews build your reputation. The Verified Badge is awarded to trusted teachers who consistently deliver quality learning experiences.</p>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="verified-badge" style="font-size:0.8rem;padding:6px 12px">✓ Top Mentor</span>
+        <span class="verified-badge" style="font-size:0.8rem;padding:6px 12px;background:rgba(181,241,60,0.1);border-color:rgba(181,241,60,0.2);color:var(--accent)">⭐ 5 Stars</span>
+        <span class="verified-badge" style="font-size:0.8rem;padding:6px 12px;background:rgba(241,194,60,0.1);border-color:rgba(241,194,60,0.2);color:var(--accent3)">🔥 Popular</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-label">Matching</div>
+      <div class="feature-icon-large">📍</div>
+      <h3>Location-Based Matching</h3>
+      <p>Discover people nearby who can swap skills with you. From 1 km to 50 km radius — a real and close-knit learning community.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-label">Community</div>
+      <div class="feature-icon-large">💬</div>
+      <h3>Chat & Scheduling</h3>
+      <p>Coordinate learning sessions directly inside the app. Schedule meetings, set locations, and start learning — all in one safe, easy place.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="download" id="download">
+  <div class="download-inner reveal">
+    <div class="download-left">
+      <h2>Start Exchanging Skills<br><span style="color:var(--accent)">Today</span></h2>
+      <p>Download SkillSwap for Android and join thousands of users already teaching and learning from each other — no cost, no limits.</p>
+      <div class="apk-info-row">
+        <span class="apk-badge">📦 v1.0.0</span>
+        <span class="apk-badge">⚡ ~18 MB</span>
+        <span class="apk-badge">🤖 Android 7.0+</span>
+      </div>
+      <div class="download-btns">
+        <a href="https://skillswap.sbs/" class="android-btn" id="apk-download-btn" onclick="handleApkDownload(event)" target="_blank" rel="noopener noreferrer">
+          <div class="android-btn-icon">📥</div>
+          <div class="android-btn-text">
+            <span class="android-btn-small">DOWNLOAD FOR ANDROID</span>
+            <span class="android-btn-big">Get the APK</span>
+          </div>
+        </a>
+        <button class="notify-btn" onclick="document.getElementById('notifModal').classList.add('active')">
+          <div class="notify-btn-icon">🔔</div>
+          <div class="notify-btn-text">
+            <span class="notify-btn-small">Notify me when</span>
+            <span class="notify-btn-big">iOS is Available</span>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div class="download-right">
+      <div class="phone-mockup">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-app-header">
+            <div class="phone-app-logo">S●</div>
+            <span class="phone-app-name">SkillSwap</span>
+            <span style="margin-left:auto;font-size:0.6rem;color:var(--muted)">📍 New York</span>
+          </div>
+          <div class="phone-content">
+            <div style="font-size:0.65rem;color:var(--muted);margin-bottom:10px">🔥 Latest Matches For You</div>
+            <div class="phone-match-card">
+              <div class="phone-match-top">
+                <div class="phone-avatar" style="background:rgba(181,241,60,0.15);color:var(--accent)">RA</div>
+                <div>
+                  <div class="phone-name">Ryan A. <span class="phone-verified">✓</span></div>
+                  <div class="phone-dist">📍 0.8 mi · Brooklyn</div>
+                </div>
+              </div>
+              <div class="phone-tags">
+                <span class="phone-tag green">☕ Barista</span>
+                <span class="phone-tag">🇯🇵 Learning Japanese</span>
+              </div>
+              <button class="phone-action">Connect & Schedule Swap</button>
+            </div>
+            <div class="phone-match-card">
+              <div class="phone-match-top">
+                <div class="phone-avatar" style="background:rgba(60,241,158,0.15);color:var(--accent2)">DS</div>
+                <div>
+                  <div class="phone-name">Diana S. <span class="phone-verified">✓</span></div>
+                  <div class="phone-dist">📍 1.7 mi · Queens</div>
+                </div>
+              </div>
+              <div class="phone-tags">
+                <span class="phone-tag green">☕ Home Barista</span>
+                <span class="phone-tag">🇯🇵 Otaku</span>
+              </div>
+            </div>
+            <div class="phone-token-bar">
+              <div>
+                <div class="phone-token-label">Your Tokens</div>
+              </div>
+              <div class="phone-token-val">🪙 12 Token</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews" id="reviews">
+  <div class="reveal">
+    <p class="section-tag">Community Reviews</p>
+    <h2 class="section-title">What Our Users Are Saying</h2>
+  </div>
+  <div class="reviews-scroll">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"I taught graphic design, earned Tokens, and used them to learn coding from a developer near my campus. A true win-win without spending a single dime!"</p>
+      <div class="review-user">
+        <div class="review-avatar" style="background:rgba(181,241,60,0.15);color:var(--accent)">AF</div>
+        <div>
+          <div class="review-name">Ashley Freeman</div>
+          <div class="review-skill">Graphic Designer · San Francisco</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"I met an amazing barista on SkillSwap. I taught him English, he taught me latte art. Now we're close friends who hang out all the time!"</p>
+      <div class="review-user">
+        <div class="review-avatar" style="background:rgba(60,241,158,0.15);color:var(--accent2)">BP</div>
+        <div>
+          <div class="review-name">Brian Parker</div>
+          <div class="review-skill">English Teacher · Chicago</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★☆</div>
+      <p class="review-text">"The Token system is brilliant. When there was no direct match, I taught yoga to 3 people, collected Tokens, then learned photography from a pro who lives 2 miles from my house."</p>
+      <div class="review-user">
+        <div class="review-avatar" style="background:rgba(241,194,60,0.15);color:var(--accent3)">SR</div>
+        <div>
+          <div class="review-name">Sarah Reynolds</div>
+          <div class="review-skill">Yoga Instructor · Austin</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"The Verified Badge made me so much more confident meeting new people. Everyone with the badge is genuinely serious and friendly. Five sessions in — all positive!"</p>
+      <div class="review-user">
+        <div class="review-avatar" style="background:rgba(181,241,60,0.15);color:var(--accent)">MR</div>
+        <div>
+          <div class="review-name">Michael Rivera</div>
+          <div class="review-skill">Software Engineer · Seattle</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"The most human-centered concept I've ever found in an app. It's not about money, it's about people helping each other. Amazing — I recommend it to everyone!"</p>
+      <div class="review-user">
+        <div class="review-avatar" style="background:rgba(60,241,158,0.15);color:var(--accent2)">NK</div>
+        <div>
+          <div class="review-name">Natalie Kim</div>
+          <div class="review-skill">Graduate Student · Boston</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TWITTER / X COMMUNITY -->
+<section class="twitter-section" id="community">
+  <div class="twitter-inner reveal">
+    <div class="twitter-left">
+      <div class="twitter-x-logo">𝕏</div>
+      <p class="section-tag" style="margin-top:28px">Join the Conversation</p>
+      <h2 class="twitter-title">We're Live<br>on <em>X (Twitter)</em></h2>
+      <p class="twitter-sub">Get the latest updates, skill-swap tips, community highlights, and early feature drops. Follow <strong>@skillswap_sbs</strong> and become part of the movement.</p>
+      <div class="twitter-actions">
+        <a href="https://x.com/skillswap_sbs" target="_blank" rel="noopener noreferrer" class="twitter-follow-btn">
+          <div class="twitter-btn-icon">𝕏</div>
+          <div class="twitter-btn-text">
+            <span class="twitter-btn-small">FOLLOW US ON</span>
+            <span class="twitter-btn-big">@skillswap_sbs</span>
+          </div>
+        </a>
+        <a href="https://x.com/intent/tweet?text=Just%20discovered%20%40skillswap_sbs%20%E2%80%94%20a%20platform%20to%20exchange%20skills%20without%20cash!%20%F0%9F%A4%9D&url=https%3A%2F%2Fx.com%2Fskillswap_sbs" target="_blank" rel="noopener noreferrer" class="twitter-share-btn">
+          <span>🔁</span> Share with Friends
+        </a>
+      </div>
+      <div class="twitter-stats-row">
+        <div class="tw-stat">
+          <span class="tw-stat-num">2.4K</span>
+          <span class="tw-stat-lbl">Followers</span>
+        </div>
+        <div class="tw-stat-divider"></div>
+        <div class="tw-stat">
+          <span class="tw-stat-num">Daily</span>
+          <span class="tw-stat-lbl">Posts</span>
+        </div>
+        <div class="tw-stat-divider"></div>
+        <div class="tw-stat">
+          <span class="tw-stat-num">100%</span>
+          <span class="tw-stat-lbl">Community</span>
+        </div>
+      </div>
+    </div>
+    <div class="twitter-right">
+      <div class="tweet-feed">
+        <div class="tweet-card tweet-card--pinned">
+          <div class="tweet-header">
+            <div class="tweet-avatar">S●</div>
+            <div class="tweet-user-info">
+              <span class="tweet-name">SkillSwap</span>
+              <span class="tweet-handle">@skillswap_sbs</span>
+            </div>
+            <div class="tweet-x-icon">𝕏</div>
+          </div>
+          <p class="tweet-text">🚀 Introducing <strong>SkillSwap</strong> — the platform where you teach what you know and learn what you want. Zero cash, pure exchange.<br><br>Japanese for espresso? Coding for yoga? Let's make it happen. 🤝<br><br>#SkillSwap #SharingEconomy #LearnTogether</p>
+          <div class="tweet-media">
+            <div class="tweet-media-inner">
+              <span style="font-size:2rem">🔄</span>
+              <span style="font-size:0.8rem;color:var(--muted)">Skills flow both ways</span>
+            </div>
+          </div>
+          <div class="tweet-actions">
+            <span class="tweet-action">💬 <span>124</span></span>
+            <span class="tweet-action">🔁 <span>89</span></span>
+            <span class="tweet-action">❤️ <span>412</span></span>
+            <span class="tweet-action pinned-tag">📌 Pinned</span>
+          </div>
+        </div>
+        <div class="tweet-card">
+          <div class="tweet-header">
+            <div class="tweet-avatar">S●</div>
+            <div class="tweet-user-info">
+              <span class="tweet-name">SkillSwap</span>
+              <span class="tweet-handle">@skillswap_sbs</span>
+            </div>
+            <span class="tweet-time">2h</span>
+          </div>
+          <p class="tweet-text">💡 Tip of the day: If you can't find a direct match, don't wait — <strong>teach first, earn Tokens</strong>, then unlock any skill you want. The community always has what you need. 🪙</p>
+          <div class="tweet-actions">
+            <span class="tweet-action">💬 <span>31</span></span>
+            <span class="tweet-action">🔁 <span>57</span></span>
+            <span class="tweet-action">❤️ <span>203</span></span>
+          </div>
+        </div>
+        <div class="tweet-card">
+          <div class="tweet-header">
+            <div class="tweet-avatar">S●</div>
+            <div class="tweet-user-info">
+              <span class="tweet-name">SkillSwap</span>
+              <span class="tweet-handle">@skillswap_sbs</span>
+            </div>
+            <span class="tweet-time">1d</span>
+          </div>
+          <p class="tweet-text">✅ New feature dropping soon: <strong>Group Swaps</strong> — learn from multiple people in one session. Stay tuned and follow us so you don't miss the launch! 👀</p>
+          <div class="tweet-actions">
+            <span class="tweet-action">💬 <span>67</span></span>
+            <span class="tweet-action">🔁 <span>134</span></span>
+            <span class="tweet-action">❤️ <span>521</span></span>
+          </div>
+        </div>
+        <a href="https://x.com/skillswap_sbs" target="_blank" rel="noopener noreferrer" class="tweet-view-more">
+          View all posts on X →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <h3>Skill<span style="color:var(--accent)">●</span>Swap</h3>
+    <p>A location-based peer-to-peer skill exchange platform. Grow with your community, no cash required.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Product</h4>
+    <a href="#">How It Works</a>
+    <a href="#">Features</a>
+    <a href="#">Token System</a>
+    <a href="#">Verified Badge</a>
+  </div>
+  <div class="footer-col">
+    <h4>Community</h4>
+    <a href="#">Forum</a>
+    <a href="#">Blog</a>
+    <a href="#">Event</a>
+    <a href="#">Become a Mentor</a>
+  </div>
+  <div class="footer-col">
+    <h4>Company</h4>
+    <a href="#">About Us</a>
+    <a href="#">Careers</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms & Conditions</a>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <span>© 2025 SkillSwap. Made with ❤️ for the world.</span>
+  <span style="display:flex;gap:16px">
+    <a href="#" style="color:var(--muted);text-decoration:none">Instagram</a>
+    <a href="#" style="color:var(--muted);text-decoration:none">Twitter/X</a>
+    <a href="#" style="color:var(--muted);text-decoration:none">TikTok</a>
+  </span>
+</div>
+
+<!-- NOTIFY MODAL -->
+<div class="modal-overlay" id="notifModal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('notifModal').classList.remove('active')">✕</button>
+    <div style="font-size:2rem;margin-bottom:16px">🍎</div>
+    <h3>iOS Notification</h3>
+    <p>SkillSwap for iPhone is currently in development. Enter your email and we'll notify you as soon as it's ready!</p>
+    <input class="modal-input" type="email" placeholder="your@email.com" id="notifEmail">
+    <button class="modal-submit" onclick="handleNotify()">Notify Me 🔔</button>
+  </div>
+</div>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Modal close on overlay click
+  document.getElementById('notifModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+  });
+
+  function handleNotify() {
+    const email = document.getElementById('notifEmail').value;
+    if (!email || !email.includes('@')) {
+      document.getElementById('notifEmail').style.borderColor = 'var(--danger)';
+      return;
+    }
+    const modal = document.getElementById('notifModal').querySelector('.modal');
+    modal.innerHTML = `
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:3rem;margin-bottom:16px">✅</div>
+        <h3 style="margin-bottom:8px">You're on the list!</h3>
+        <p style="color:var(--muted)">We'll notify <strong style="color:var(--accent)">${email}</strong> as soon as SkillSwap iOS is available. Thank you!</p>
+        <button style="margin-top:28px;background:var(--accent);color:#0d0f0e;border:none;padding:12px 28px;border-radius:100px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;font-size:0.95rem" onclick="document.getElementById('notifModal').classList.remove('active')">Close</button>
+      </div>`;
+  }
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text)' : '';
+    });
+  });
+</script>
+
+<!-- DOWNLOAD TOAST -->
+<div class="download-toast" id="downloadToast">
+  <div class="toast-icon">📥</div>
+  <div class="toast-text">
+    <span class="toast-title">Download Starting...</span>
+    <span class="toast-sub">SkillSwap.apk · ~18 MB · Android 7.0+</span>
+  </div>
+  <div class="toast-progress"><div class="toast-progress-bar" id="toastBar"></div></div>
+</div>
+
+<script>
+  function handleApkDownload(e) {
+    showToast('📥', 'Redirecting...', 'Opening SkillSwap website...');
+  }
+
+  function showToast(icon, title, sub) {
+    const toast = document.getElementById('downloadToast');
+    toast.querySelector('.toast-icon').textContent = icon;
+    toast.querySelector('.toast-title').textContent = title;
+    toast.querySelector('.toast-sub').textContent = sub;
+    const bar = document.getElementById('toastBar');
+    bar.style.width = '0%';
+    toast.classList.add('show');
+    setTimeout(() => { bar.style.width = '100%'; }, 100);
+    setTimeout(() => { toast.classList.remove('show'); bar.style.width = '0%'; }, 4000);
+  }
+</script>
+
+</body>
+</html>
